@@ -21,19 +21,35 @@ class TextRequest(BaseModel):
 
 
 # Start API
-app = FastAPI()
+app = FastAPI(
+    title="Cricket", description="Your personal Jiminy Cricket when posting online."
+)
 
 
-@app.post("/sonar/")
-async def sonar_endpoint(sonar_request: TextRequest):
-    response = sonar.ping(text=sonar_request.text)
-    return JSONResponse(content=response)
+def handle_sonar_response(response):
+
+    base_response = {"hate_speech": False, "offensive_language": False}
+
+    if response.get("top_class") == "neither":
+        return base_response
+
+    classes = response.get("classes")
+
+    for c in classes:
+        if c.get("class_name") == "neither":
+            continue
+        if c.get("class_name") == "hate_speech" and c.get("confidence") > 0.7:
+            base_response["hate_speech"] = True
+        if c.get("class_name") == "offensive_language" and c.get("confidence") > 0.8:
+            base_response["offensive_language"] = True
+
+    return base_response
 
 
-@app.post("/perspective/")
-async def perspective_endpoint(sonar_request: TextRequest):
+@app.post("/check/")
+async def check(r: TextRequest):
     request = {
-        "comment": {"text": sonar_request.text},
+        "comment": {"text": r.text},
         "requestedAttributes": {
             "TOXICITY": {},
             "IDENTITY_ATTACK": {},
@@ -46,17 +62,18 @@ async def perspective_endpoint(sonar_request: TextRequest):
 
     try:
         perspective_response = service.comments().analyze(body=request).execute()
-        sonar_response = sonar.ping(text=sonar_request.text)
+        sonar_response = sonar.ping(text=r.text)
     except Exception as e:
         response_json = {"Error": e}
 
     scores = perspective_response["attributeScores"]
-    TOXICITY = scores["TOXICITY"]["summaryScore"]["value"]
-    IDENTITY_ATTACK = scores["IDENTITY_ATTACK"]["summaryScore"]["value"]
-    INSULT = scores["INSULT"]["summaryScore"]["value"]
-    PROFANITY = scores["PROFANITY"]["summaryScore"]["value"]
-    THREAT = scores["THREAT"]["summaryScore"]["value"]
-    SEXUALLY_EXPLICIT = scores["SEXUALLY_EXPLICIT"]["summaryScore"]["value"]
+    TOXICITY = scores["TOXICITY"]["summaryScore"]["value"] > 0.8
+    IDENTITY_ATTACK = scores["IDENTITY_ATTACK"]["summaryScore"]["value"] > 0.8
+    INSULT = scores["INSULT"]["summaryScore"]["value"] > 0.8
+    PROFANITY = scores["PROFANITY"]["summaryScore"]["value"] > 0.8
+    THREAT = scores["THREAT"]["summaryScore"]["value"] > 0.8
+    SEXUALLY_EXPLICIT = scores["SEXUALLY_EXPLICIT"]["summaryScore"]["value"] > 0.8
+
     response_json = {
         "toxicity": TOXICITY,
         "identity_attack": IDENTITY_ATTACK,
@@ -65,9 +82,6 @@ async def perspective_endpoint(sonar_request: TextRequest):
         "thread": THREAT,
         "sexually_explicit": SEXUALLY_EXPLICIT,
     }
+
+    response_json.update(handle_sonar_response(sonar_response))
     return JSONResponse(content=response_json)
-
-
-@app.get("/healthcheck")
-async def healthcheck():
-    return {"status": "alive"}
