@@ -1,4 +1,4 @@
-# Cricket
+# Cricket :cricket:
 
 Your personal *Jiminy Cricket* when posting online. This API will help you check the perceived impact a comment or post might have on a conversation.
 
