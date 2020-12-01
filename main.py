@@ -1,3 +1,4 @@
+from typing import Text
 from fastapi import FastAPI
 from fastapi import Query
 from pydantic import BaseModel
