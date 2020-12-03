@@ -6,6 +6,10 @@ IMAGE_NAME := gcr.io/buffer-data/cricket:latest
 build:
 	docker build -t $(IMAGE_NAME) .
 
+.PHONY: get-model
+get-model:
+	curl -LJ https://github.com/unitaryai/detoxify/releases/download/v0.1-alpha/toxic_original-c1212f89.ckpt -o model.ckpt
+
 .PHONY: run
 run: build
 	docker run -it -p 80:80 --rm $(IMAGE_NAME)
@@ -24,4 +28,4 @@ push: build
 
 .PHONY: deploy
 deploy: push
-	gcloud run deploy cricket --image $(IMAGE_NAME) --platform managed --region us-central1
+	gcloud beta run --platform managed services replace service.yaml

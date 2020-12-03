@@ -15,7 +15,7 @@ app = FastAPI(
     title="Cricket", description="Your personal Jiminy Cricket when posting online."
 )
 
-model = Detoxify("original")
+model = Detoxify("original", checkpoint="model.ckpt")
 
 
 @app.post("/check/")
