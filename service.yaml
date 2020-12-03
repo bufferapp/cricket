@@ -21,7 +21,7 @@ spec:
         resources:
           limits:
             cpu: 2000m
-            memory: 1024Mi
+            memory: 4096Mi
       serviceAccountName: 655891191260-compute@developer.gserviceaccount.com
       timeoutSeconds: 300
   traffic:
