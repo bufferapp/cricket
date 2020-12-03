@@ -1,7 +1,9 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:latest
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
-RUN pip install --no-cache-dir hatesonar oauth2client google-api-python-client
+COPY requirements.txt /tmp/
 
-ENV MAX_WORKERS=2
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+RUN python -c "from detoxify import Detoxify; model = Detoxify('original')"
 
 COPY main.py /app/

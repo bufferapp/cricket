@@ -8,11 +8,15 @@ build:
 
 .PHONY: run
 run: build
-	docker run -it --env-file .env -p 80:80 --rm $(IMAGE_NAME)
+	docker run -it -p 80:80 --rm $(IMAGE_NAME)
 
 .PHONY: dev
 dev: build
-	docker run -it --env-file .env -v $(PWD):/app -p 80:80 --rm $(IMAGE_NAME) /bin/bash /start-reload.sh
+	docker run -it -v $(PWD):/app -p 80:80 --rm $(IMAGE_NAME) /bin/bash /start-reload.sh
+
+.PHONY: bash
+bash: build
+	docker run -it -v $(PWD):/app -p 80:80 --rm $(IMAGE_NAME) /bin/bash
 
 .PHONY: push
 push: build
