@@ -1,5 +1,3 @@
-import os
-
 from detoxify import Detoxify
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
