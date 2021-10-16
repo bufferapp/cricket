@@ -1,2 +1,2 @@
-fastapi==0.62.0
-detoxify==0.2.2
+fastapi==0.68.1
+detoxify==0.3.0

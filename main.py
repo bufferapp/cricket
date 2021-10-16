@@ -29,3 +29,8 @@ async def check(r: TextRequest):
         "identity_hate": float(response["identity_hate"]),
     }
     return JSONResponse(content=response_json)
+
+
+@app.get("/")
+async def home():
+    return {"message": "Hello World!"}
